@@ -4,7 +4,7 @@ from database.schema import initialize_schema
 from views.trainer_window import view_trainer_window
 from views.user_window import view_user_window
 from controllers.trainer import add_trainer
-from controllers.users import add_user
+from views.add_users import add_user
 
 initialize_schema()
 
