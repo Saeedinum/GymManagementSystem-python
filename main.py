@@ -3,7 +3,7 @@ from tkinter import ttk
 from database.schema import initialize_schema
 from views.trainer_window import view_trainer_window
 from views.user_window import view_user_window
-from controllers.trainer import add_trainer
+from views.add_trainer import add_trainer
 from views.add_users import add_user
 
 initialize_schema()
@@ -40,7 +40,7 @@ def create_button(frame, text, command):
 
 create_button(right_frame, "Add User", lambda: add_user(left_frame))
 create_button(right_frame, "View Users", lambda: view_user_window(left_frame))
-create_button(right_frame, "Add Trainer", add_trainer)
+create_button(right_frame, "Add Trainer", lambda: add_trainer(left_frame))
 create_button(right_frame, "View Trainer", view_trainer_window)
 
 left_frame = Frame(root, bg='#000B58')
