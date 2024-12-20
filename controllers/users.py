@@ -7,7 +7,7 @@ from views.bill_window import view_bill_window
 def submit_user(first_name, last_name, phone, trainer_name, start_date, end_date, price , frame,button_frame):
 
     if not all([first_name, last_name, phone, trainer_name, start_date, end_date, price]):
-        Label(frame, text="Please fill all fields!", fg="red").pack(pady=10)
+        Label(frame, text="Please fill all fields!", fg="red", background='#000B58').pack(pady=10)
         return
 
     # Get trainer ID based on the trainer's name
