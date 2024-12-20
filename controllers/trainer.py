@@ -5,8 +5,7 @@ from tkinter.messagebox import showinfo
 
 
 def fetch_all_trainers():
-    con = get_connection()
-    cursor = con.cursor()
+    [con, cursor] = get_connection()
     cursor.execute("""
         SELECT 
             trainer_id,
@@ -60,8 +59,7 @@ def add_trainer():
             Label(add_user, text="Please fill all fields!", fg="red").pack(pady=10)
             return
 
-        con = sqlite3.connect("database.db")
-        cursor = con.cursor()
+        [con, cursor] = get_connection()
         cursor.execute("""
             INSERT INTO trainer (trainer_fname, trainer_lname, trainer_phone, trainer_salary, trainer_address)
             VALUES (?, ?, ?, ?, ?)

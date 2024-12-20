@@ -2,6 +2,8 @@ import sqlite3
 from tkinter import * 
 from tkinter.messagebox import showinfo
 
+from database.db_connection import get_connection
+
 def view_bill_window(customer_id):
     # Create a new window for displaying the bill details
     bill_window = Toplevel(Tk() )
@@ -9,8 +11,7 @@ def view_bill_window(customer_id):
     bill_window.title('Bill Details')
 
     # Connect to the database
-    con = sqlite3.connect("database.db")
-    cursor = con.cursor()
+    [con, cursor] = get_connection()
 
     # Query to get customer details and calculate the total amount
     cursor.execute("""

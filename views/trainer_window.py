@@ -3,6 +3,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 
+from database.db_connection import get_connection
+
 def view_trainer_window():
     view_trainer = Toplevel(Tk() )
     view_trainer.geometry('1700x500')
@@ -27,7 +29,6 @@ def view_trainer_window():
     tree.column("Address", width=250, anchor=CENTER)
     tree.pack(fill=BOTH, expand=True)
 
-
     # Adding a search entry field
     search_label = Label(view_trainer, text="Search by Name or Phone:")
     search_label.pack(pady=10)
@@ -46,8 +47,7 @@ def view_trainer_window():
             tree.delete(row)
 
         try:
-            con = sqlite3.connect("database.db")
-            cursor = con.cursor()
+            [con, cursor] = get_connection()
             cursor.execute("""
                 SELECT 
                     trainer_id,
@@ -68,13 +68,11 @@ def view_trainer_window():
         except sqlite3.Error as e:
             print(f"Database error: {e}")
 
-
     #delete trainer method 
     def delete_trainer():
         trainer_name = delete_entry.get().strip()  # Get the name from the delete entry field
         # Connect to the database and delete trainers matching the given name
-        con = sqlite3.connect("database.db")
-        cursor = con.cursor()
+        [con, cursor] = get_connection()
         cursor.execute("""
             DELETE FROM trainer 
             WHERE trainer_fname || ' ' || trainer_lname = ?
@@ -91,8 +89,7 @@ def view_trainer_window():
             tree.delete(row)
 
         try:
-            con = sqlite3.connect("database.db")
-            cursor = con.cursor()
+            [con, cursor] = get_connection()
             cursor.execute("""
                 SELECT 
                     trainer_id,
@@ -113,7 +110,6 @@ def view_trainer_window():
         except sqlite3.Error as e:
             print(f"Database error: {e}")
 
-
     # Function to search trainers
     def search_trainers():
         search_term = search_entry.get()
@@ -125,8 +121,7 @@ def view_trainer_window():
             tree.delete(row)
 
         try:
-            con = sqlite3.connect("database.db")
-            cursor = con.cursor()
+            [con, cursor] = get_connection()
             cursor.execute("""
                 SELECT 
                     trainer_id,
@@ -148,10 +143,8 @@ def view_trainer_window():
         except sqlite3.Error as e:
             print(f"Database error: {e}")
 
-
     #connect the DataBase 
-    con = sqlite3.connect("database.db")
-    cursor = con.cursor()
+    [con, cursor] = get_connection()
     cursor.execute("""
     SELECT 
             trainer_id,
@@ -165,7 +158,6 @@ def view_trainer_window():
 
     for row in rows:
         tree.insert("", END, values=row)
-
 
     #adding the buttons
     Button(view_trainer, text="Search", width=20 , command=search_trainers).pack(side="left", padx=10, pady=10)

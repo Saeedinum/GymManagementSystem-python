@@ -1,4 +1,4 @@
 import sqlite3
 
 def get_connection():
-    return sqlite3.connect("database.db")
+    return [sqlite3.connect("database.db"), sqlite3.connect("database.db").cursor()]

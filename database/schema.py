@@ -1,8 +1,7 @@
 from .db_connection import get_connection
 
 def initialize_schema():
-    con = get_connection()
-    cursor = con.cursor()
+    [con, cursor] = get_connection()
 
     # Trainer Table
     cursor.execute("""

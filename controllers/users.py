@@ -1,6 +1,7 @@
 import sqlite3
 from tkinter import Button, Label
 
+from database.db_connection import get_connection
 from views.bill_window import view_bill_window
 
 # Submit button function
@@ -11,8 +12,7 @@ def submit_user(first_name, last_name, phone, trainer_name, start_date, end_date
         return
 
     # Get trainer ID based on the trainer's name
-    con = sqlite3.connect("database.db")
-    cursor = con.cursor()
+    [con, cursor] = get_connection()
     cursor.execute("SELECT trainer_id FROM trainer WHERE trainer_fname || ' ' || trainer_lname = ?", (trainer_name,))
     trainer_id = cursor.fetchone()
 

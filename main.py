@@ -39,7 +39,7 @@ def create_button(frame, text, command):
     return button
 
 create_button(right_frame, "Add User", lambda: add_user(left_frame))
-create_button(right_frame, "View Users", view_user_window)
+create_button(right_frame, "View Users", lambda: view_user_window(left_frame))
 create_button(right_frame, "Add Trainer", add_trainer)
 create_button(right_frame, "View Trainer", view_trainer_window)
 

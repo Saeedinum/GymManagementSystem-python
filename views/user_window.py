@@ -1,21 +1,38 @@
 import sqlite3 
 from tkinter import * 
 from tkinter import ttk
+from tkinter.font import Font
 from tkinter.messagebox import showinfo
 
+from database.db_connection import get_connection
 
-def view_user_window():
-    view_user = Toplevel(Tk() )
-    view_user.geometry('1700x500')
-    view_user.title('User Details')
+def view_user_window(frame):
+        # Clear previous content in left frame
+    for widget in frame.winfo_children():
+        widget.destroy()
 
-    # Adding frame
-    frame = Frame(view_user)
-    frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
+    [con, cursor] = get_connection()
+    # Adding a Treeview for displaying user details
+    style = ttk.Style()
+    style.configure("Custom.Treeview",
+                    background='#000B58',  # Row background color
+                    foreground="white",    # Text color
+                    fieldbackground="red",  # Treeview background
+                    font=('Arial', 14))    # Font style and size
 
+    style.configure("Custom.Treeview.Heading",
+                    background="red",  # Header background color
+                    foreground="black",    # Header text color
+                    font=('Arial', 18, 'bold'))
+
+    style.map("Custom.Treeview",
+              background=[("selected", "#074799")],  # Selected row background color
+              foreground=[("selected", "black")])   # Selected row text color
 
     # Adding a Treeview for displaying user details
-    tree = ttk.Treeview(frame, columns=("ID","Name", "Phone", "Trainer","Start Date", "End Date" , "Price"),show="headings", height=15)
+    tree = ttk.Treeview(frame, columns=("ID", "Name", "Phone", "Trainer", "Start Date", "End Date", "Price"),
+                        style="Custom.Treeview", show="headings", height=15)
+
     tree.heading("ID", text="ID")
     tree.heading("Name", text="Name")
     tree.heading("Phone", text="Phone")
@@ -24,8 +41,7 @@ def view_user_window():
     tree.heading("End Date", text="End Date")
     tree.heading("Price", text="Price")
 
-
-    tree.column("ID", width=50, anchor=CENTER) 
+    tree.column("ID", width=50, anchor=CENTER ) 
     tree.column("Name", width=200, anchor=CENTER)
     tree.column("Phone", width=150, anchor=CENTER)
     tree.column("Trainer", width=200, anchor=CENTER)
@@ -34,17 +50,17 @@ def view_user_window():
     tree.column("Price" , width=100 , anchor=CENTER)
     tree.pack(fill=BOTH, expand=True)
 
-    # Adding a search entry field
-    search_label = Label(view_user, text="Search by Name or Phone:")
-    search_label.pack(pady=10)
-    search_entry = Entry(view_user, width=30)
-    search_entry.pack(pady=5)
+    container = Frame(frame, background='#000B58')
+    container.pack(pady=10, fill="x")
+    Label(container, text="Search by Name or Phone:",  fg="white", bg='#000B58').pack(side="left", padx=10)
+    search_entry = Entry(container, width=30, background="#074799",  bd=0, fg="white")
+    search_entry.pack(side="left", padx=10)
 
-    #delete user
-    delete_label = Label(view_user, text="Delet Customer: ")
-    delete_label.pack(pady=10)
-    delete_entry = Entry(view_user, width=30)
-    delete_entry.pack(pady=5)
+    container = Frame(frame, background='#000B58')
+    container.pack(pady=10, fill="x")
+    Label(container, text="Delet Customer: " ,  fg="white", bg='#000B58').pack(side="left", padx=10)
+    delete_entry = Entry(container, width=30, background="#074799",  bd=0, fg="white")
+    delete_entry.pack(side="left", padx=10)
 
     # Function to display all users initially
     def display_all_users():
@@ -54,9 +70,6 @@ def view_user_window():
 
         # Connect to the database and fetch all user details
         try:
-            con = sqlite3.connect("database.db")
-            cursor = con.cursor()
-
             # Query to get all user details
             cursor.execute("""
                 SELECT 
@@ -83,9 +96,6 @@ def view_user_window():
     #delete customer method
     def delete_customer():
         customer_name = delete_entry.get().strip()  # Get the name from the delete entry field
-        # Connect to the database and delete trainers matching the given name
-        con = sqlite3.connect("database.db")
-        cursor = con.cursor()
         cursor.execute("""
             DELETE FROM customers WHERE cust_fname || ' ' || cust_lname = ?
         """, (customer_name,))
@@ -105,8 +115,6 @@ def view_user_window():
             tree.delete(row)
 
         try:
-            con = sqlite3.connect("database.db")
-            cursor = con.cursor()
             cursor.execute("""
                 SELECT 
                     customers.customer_id AS ID,
@@ -130,10 +138,6 @@ def view_user_window():
         except sqlite3.Error as e:
             print(f"Database error: {e}")
 
-
-    #connect the DataBase 
-    con = sqlite3.connect('database.db')
-    cursor=con.cursor()
     cursor.execute("""
         SELECT 
             customers.customer_id AS ID,
@@ -153,6 +157,6 @@ def view_user_window():
         tree.insert("", END, values=row)
 
     #adding the buttons
-    Button(view_user, text="Search", width=20 , command=search_users).pack(side="left", padx=10, pady=10)
-    Button(view_user, text="Delete", width=20 , command=delete_customer).pack(side="left", padx=10, pady=10)
+    Button(frame, text="Search", width=20 , command=search_users , background='#000B58' , fg="white"  ).pack(side="left", padx=10, pady=10)
+    Button(frame, text="Delete", width=20 , command=delete_customer , background='#000B58' , fg="white").pack(side="left", padx=10, pady=10)
 
