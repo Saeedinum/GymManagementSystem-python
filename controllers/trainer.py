@@ -1,7 +1,6 @@
 from database.db_connection import get_connection
 import sqlite3 
 from tkinter import * 
-from tkinter import ttk
 from tkinter.messagebox import showinfo
 
 

@@ -1,6 +1,5 @@
 import sqlite3 
 from tkinter import * 
-from tkinter import ttk
 from tkinter.messagebox import showinfo
 
 def view_bill_window(customer_id):
