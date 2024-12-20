@@ -1,21 +1,32 @@
-import sqlite3 
-from tkinter import * 
+from tkinter import *
 from tkinter import ttk
 from tkinter.messagebox import showinfo
+from controllers.trainer import delete_trainer_by_name, get_all_trainers, search_trainers
 
-from database.db_connection import get_connection
+def view_trainer_window(frame):
 
-def view_trainer_window():
-    view_trainer = Toplevel(Tk() )
-    view_trainer.geometry('1700x500')
-    view_trainer.title('User Details')
-
-    # Adding frame
-    frame = Frame(view_trainer)
-    frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
+    for widget in frame.winfo_children():
+        widget.destroy()
 
     # Adding a Treeview for displaying trainer details
-    tree = ttk.Treeview(frame, columns=("ID", "Name", "Phone", "Salary", "Address"),show="headings", height=15)
+    style = ttk.Style()
+    style.configure("Custom.Treeview",
+                    background='#000B58',  # Row background color
+                    foreground="white",    # Text color
+                    fieldbackground="red",  # Treeview background
+                    font=('Arial', 14))    # Font style and size
+
+    style.configure("Custom.Treeview.Heading",
+                    background="red",  # Header background color
+                    foreground="black",    # Header text color
+                    font=('Arial', 18, 'bold'))
+
+    style.map("Custom.Treeview",
+              background=[("selected", "#074799")],  # Selected row background color
+              foreground=[("selected", "black")])   # Selected row text color
+
+
+    tree = ttk.Treeview(frame, columns=("ID", "Name", "Phone", "Salary", "Address"), style="Custom.Treeview", show="headings", height=15)
     tree.heading("ID", text="ID")
     tree.heading("Name", text="Name")
     tree.heading("Phone", text="Phone")
@@ -29,89 +40,39 @@ def view_trainer_window():
     tree.column("Address", width=250, anchor=CENTER)
     tree.pack(fill=BOTH, expand=True)
 
-    # Adding a search entry field
-    search_label = Label(view_trainer, text="Search by Name or Phone:")
-    search_label.pack(pady=10)
-    search_entry = Entry(view_trainer, width=30)
-    search_entry.pack(pady=5)
+    container = Frame(frame, background='#000B58')
+    container.pack(pady=10, fill="x")
+    Label(container, text="Search by Name or Phone:",  fg="white", bg='#000B58').pack(side="left", padx=10)
+    search_entry = Entry(container, width=30, background="#074799",  bd=0, fg="white")
+    search_entry.pack(side="left", padx=10)
 
-    # Adding a delete entry field
-    delete_label = Label(view_trainer, text="Delete Trainer :")
-    delete_label.pack(pady=10)
-    delete_entry = Entry(view_trainer, width=30)
-    delete_entry.pack(pady=5)
+    container = Frame(frame, background='#000B58')
+    container.pack(pady=10, fill="x")
+    Label(container, text="Delete Trainer :",  fg="white", bg='#000B58').pack(side="left", padx=10)
+    delete_entry = Entry(container, width=30, background="#074799",  bd=0, fg="white")
+    delete_entry.pack(side="left", padx=10)
 
     # Function to display all trainers initially
     def display_all_trainers():
         for row in tree.get_children():
             tree.delete(row)
 
-        try:
-            [con, cursor] = get_connection()
-            cursor.execute("""
-                SELECT 
-                    trainer_id,
-                    trainer_fname || ' ' || trainer_lname,
-                    trainer_phone,
-                    trainer_salary,
-                    trainer_address
-                FROM trainer
-            """)
-            rows = cursor.fetchall()
-            con.close()
+        rows = get_all_trainers()
 
-            if rows:
-                for row in rows:
-                    tree.insert("", END, values=row)
-            else:
-                showinfo("No Data", "No trainers found in the database.")
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
+        if rows:
+            for row in rows:
+                tree.insert("", END, values=row)
+        else:
+            showinfo("No Data", "No trainers found in the database.")
 
-    #delete trainer method 
+    # delete trainer method
     def delete_trainer():
         trainer_name = delete_entry.get().strip()  # Get the name from the delete entry field
-        # Connect to the database and delete trainers matching the given name
-        [con, cursor] = get_connection()
-        cursor.execute("""
-            DELETE FROM trainer 
-            WHERE trainer_fname || ' ' || trainer_lname = ?
-        """, (trainer_name,))
-        con.commit()
-        con.close()
-
-        # Refresh the Treeview to show the updated list
-        display_all_trainers()
-
-    # Function to display all trainers initially
-    def display_all_trainers():
-        for row in tree.get_children():
-            tree.delete(row)
-
-        try:
-            [con, cursor] = get_connection()
-            cursor.execute("""
-                SELECT 
-                    trainer_id,
-                    trainer_fname || ' ' || trainer_lname,
-                    trainer_phone,
-                    trainer_salary,
-                    trainer_address
-                FROM trainer
-            """)
-            rows = cursor.fetchall()
-            con.close()
-
-            if rows:
-                for row in rows:
-                    tree.insert("", END, values=row)
-            else:
-                showinfo("No Data", "No trainers found in the database.")
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
+        delete_trainer_by_name(trainer_name)  # Call the database function to delete the trainer
+        display_all_trainers()  # Refresh the Treeview to show the updated list
 
     # Function to search trainers
-    def search_trainers():
+    def search_trainers_fn():
         search_term = search_entry.get()
         if not search_term:
             display_all_trainers()
@@ -120,45 +81,17 @@ def view_trainer_window():
         for row in tree.get_children():
             tree.delete(row)
 
-        try:
-            [con, cursor] = get_connection()
-            cursor.execute("""
-                SELECT 
-                    trainer_id,
-                    trainer_fname || ' ' || trainer_lname,
-                    trainer_phone,
-                    trainer_salary,
-                    trainer_address
-                FROM trainer
-                WHERE trainer_phone LIKE ? OR trainer_fname || ' ' || trainer_lname LIKE ?
-            """, ('%' + search_term + '%', '%' + search_term + '%'))
-            rows = cursor.fetchall()
-            con.close()
+        rows = search_trainers(search_term)
 
-            if rows:
-                for row in rows:
-                    tree.insert("", END, values=row)
-            else:
-                showinfo("No Results", "No trainers found matching the search term.")
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
+        if rows:
+            for row in rows:
+                tree.insert("", END, values=row)
+        else:
+            showinfo("No Results", "No trainers found matching the search term.")
 
-    #connect the DataBase 
-    [con, cursor] = get_connection()
-    cursor.execute("""
-    SELECT 
-            trainer_id,
-            trainer_fname || ' ' || trainer_lname,
-            trainer_phone,
-            trainer_salary,
-            trainer_address
-        FROM trainer""")
-    rows = cursor.fetchall()
-    con.close()
+    # Initial display of all trainers
+    display_all_trainers()
 
-    for row in rows:
-        tree.insert("", END, values=row)
-
-    #adding the buttons
-    Button(view_trainer, text="Search", width=20 , command=search_trainers).pack(side="left", padx=10, pady=10)
-    Button(view_trainer, text="Delete", width=20 , command=delete_trainer).pack(side="left", padx=10, pady=10)
+    # Adding buttons
+    Button(frame, text="Search", width=20, command=search_trainers_fn, background='#000B58', fg="white").pack(side="left", padx=10, pady=10)
+    Button(frame, text="Delete", width=20, command=delete_trainer, background='#000B58', fg="white").pack(side="left", padx=10, pady=10)

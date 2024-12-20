@@ -41,7 +41,7 @@ def create_button(frame, text, command):
 create_button(right_frame, "Add User", lambda: add_user(left_frame))
 create_button(right_frame, "View Users", lambda: view_user_window(left_frame))
 create_button(right_frame, "Add Trainer", lambda: add_trainer(left_frame))
-create_button(right_frame, "View Trainer", view_trainer_window)
+create_button(right_frame, "View Trainers", lambda: view_trainer_window(left_frame))
 
 left_frame = Frame(root, bg='#000B58')
 left_frame.pack(side="left", expand=True, fill="both")
