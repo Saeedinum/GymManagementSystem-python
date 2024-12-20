@@ -41,3 +41,54 @@ def submit_user(first_name, last_name, phone, trainer_name, start_date, end_date
     # Pass the customer_id dynamically for the Bill button
     Label(frame, text="View Bill:").pack(pady=10)
     Button(button_frame, text="Bill", width=10, command=lambda: view_bill_window(customer_id)).grid(row=0, column=1, padx=10, pady=10)
+
+# db_connection.py
+import sqlite3
+
+def fetch_all_users(cursor):
+    """Fetches all users from the database."""
+    try:
+        cursor.execute("""
+            SELECT 
+                customers.customer_id AS ID,
+                customers.cust_fname || ' ' || customers.cust_lname AS Name,
+                customers.cust_phone AS Phone,
+                trainer.trainer_fname || ' ' || trainer.trainer_lname AS Trainer,
+                customers.membership_start AS "Start Date",
+                customers.membership_end AS "End Date"
+            FROM customers
+            JOIN trainer ON customers.trainer_id = trainer.trainer_id;
+        """)
+        return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error fetching users: {e}")
+        return []
+
+def delete_customer_by_name(cursor, customer_name):
+    """Deletes a customer from the database by name."""
+    try:
+        cursor.execute("""
+            DELETE FROM customers WHERE cust_fname || ' ' || cust_lname = ?
+        """, (customer_name,))
+    except sqlite3.Error as e:
+        print(f"Error deleting user: {e}")
+
+def search_users(cursor, search_term):
+    """Searches for users by name or phone."""
+    try:
+        cursor.execute("""
+            SELECT 
+                customers.customer_id AS ID,
+                customers.cust_fname || ' ' || customers.cust_lname AS Name,
+                customers.cust_phone AS Phone,
+                trainer.trainer_fname || ' ' || trainer.trainer_lname AS Trainer,
+                customers.membership_start AS "Start Date",
+                customers.membership_end AS "End Date"
+            FROM customers
+            JOIN trainer ON customers.trainer_id = trainer.trainer_id
+            WHERE customers.cust_phone LIKE ? OR customers.cust_fname || ' ' || customers.cust_lname LIKE ?
+        """, ('%' + search_term + '%', '%' + search_term + '%'))
+        return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error searching users: {e}")
+        return []
